@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tuteur IA Collège</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" type="image/png" href="https://img.icons8.com/clouds/100/ai.png">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo-container">
+                <img src="https://img.icons8.com/clouds/100/ai.png" alt="AI Tutor" class="logo">
+                <h1>Tuteur IA</h1>
+            </div>
+            <button class="new-chat" onclick="createNewChat()">➕ Nouvelle discussion</button>
+            <div class="chat-history" id="chatHistory"></div>
+        </aside>
+
+        <main class="main-content">
+            <div class="chat-box" id="chatBox"></div>
+            <div class="input-area">
+                <input type="text" id="userInput" placeholder="Posez votre question ici...">
+                <button onclick="processQuestion()">Envoyer</button>
+            </div>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
