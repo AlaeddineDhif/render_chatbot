@@ -9,6 +9,11 @@ function init() {
         loadChat(currentChat);
     }
     renderChatList();
+
+    // Activer le mode sombre si déjà configuré
+    if (localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark-mode');
+    }
 }
 
 function createNewChat() {
@@ -109,6 +114,28 @@ async function processQuestion() {
     }
     
     saveToLocalStorage();
+}
+
+function clearHistory() {
+    if (confirm("Êtes-vous sûr de vouloir effacer l'historique ?")) {
+        localStorage.removeItem('chats');
+        location.reload();
+    }
+}
+
+function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+}
+
+function downloadHistory() {
+    const blob = new Blob([JSON.stringify(chats, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'historique-chats.json';
+    a.click();
+    URL.revokeObjectURL(url);
 }
 
 function saveToLocalStorage() {
