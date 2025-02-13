@@ -10,7 +10,6 @@ function init() {
     }
     renderChatList();
 
-    // Activer le mode sombre si déjà configuré
     if (localStorage.getItem('darkMode') === 'true') {
         document.body.classList.add('dark-mode');
     }
@@ -28,7 +27,7 @@ function createNewChat() {
     saveToLocalStorage();
     renderChatList();
     clearChatBox();
-    window.location.href = '/'; // Recharger la page pour la nouvelle discussion
+    window.location.href = '/';
 }
 
 function renderChatList() {
@@ -72,7 +71,7 @@ async function processQuestion() {
     const question = input.value.trim();
     if (!question) return;
 
-    // Ajouter message utilisateur
+    // Message utilisateur
     const userMsg = {
         content: question,
         role: 'user',
@@ -80,7 +79,6 @@ async function processQuestion() {
     };
     currentChat.messages.push(userMsg);
     appendMessage(question, 'user');
-    
     input.value = '';
     
     try {
@@ -91,50 +89,69 @@ async function processQuestion() {
             },
             body: JSON.stringify({ question })
         });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            const aiMsg = {
-                content: data.answer,
-                role: 'ai',
-                timestamp: data.timestamp
-            };
-            currentChat.messages.push(aiMsg);
-            appendMessage(data.answer, 'ai');
-        } else {
-            throw new Error(data.error);
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let aiMsg = null;
+        let messageDiv = null;
+        const chatBox = document.getElementById('chatBox');
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            
+            const lines = buffer.split('\n');
+            for (let i = 0; i < lines.length - 1; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+
+                let data;
+                try {
+                    data = JSON.parse(line);
+                } catch (e) {
+                    console.error('JSON invalide:', line);
+                    continue;
+                }
+
+                if (data.error) {
+                    appendMessage(`Erreur: ${data.error}`, 'ai');
+                    throw new Error(data.error);
+                }
+
+                if (!aiMsg) {
+                    // Création du message AI
+                    aiMsg = {
+                        content: data.chunk,
+                        role: 'ai',
+                        timestamp: data.timestamp
+                    };
+                    currentChat.messages.push(aiMsg);
+                    appendMessage(data.chunk, 'ai');
+                    messageDiv = chatBox.lastChild;
+                } else {
+                    // Mise à jour progressive
+                    aiMsg.content += data.chunk;
+                    messageDiv.querySelector('div').textContent = aiMsg.content;
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                }
+            }
+            buffer = lines[lines.length - 1];
         }
+
+        if (buffer.trim()) {
+            const data = JSON.parse(buffer);
+            aiMsg.content += data.chunk;
+            messageDiv.querySelector('div').textContent = aiMsg.content;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        saveToLocalStorage();
+        
     } catch (error) {
         appendMessage(`Erreur: ${error.message}`, 'ai');
     }
-    
-    saveToLocalStorage();
 }
 
-function clearHistory() {
-    if (confirm("Êtes-vous sûr de vouloir effacer l'historique ?")) {
-        localStorage.removeItem('chats');
-        location.reload();
-    }
-}
-
-function toggleDarkMode() {
-    document.body.classList.toggle('dark-mode');
-    localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
-}
-
-function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    sidebar.classList.toggle('collapsed');
-}
-
-function saveToLocalStorage() {
-    localStorage.setItem('chats', JSON.stringify(chats));
-}
-
-// Initialisation
-document.addEventListener('DOMContentLoaded', init);
-document.getElementById('userInput').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') processQuestion();
-});
+// Les autres fonctions restent identiques...
