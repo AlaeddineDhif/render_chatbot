@@ -13,6 +13,15 @@ function init() {
     if (localStorage.getItem('darkMode') === 'true') {
         document.body.classList.add('dark-mode');
     }
+
+    // Gestion de la touche Entrée
+    const userInput = document.getElementById('userInput');
+    userInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Empêcher le comportement par défaut (comme un saut de ligne)
+            processQuestion(); // Appeler la fonction pour traiter la question
+        }
+    });
 }
 
 function createNewChat() {
@@ -71,7 +80,7 @@ async function processQuestion() {
     const question = input.value.trim();
     if (!question) return;
 
-    // Message utilisateur
+    // Ajouter le message de l'utilisateur
     const userMsg = {
         content: question,
         role: 'user',
@@ -79,8 +88,8 @@ async function processQuestion() {
     };
     currentChat.messages.push(userMsg);
     appendMessage(question, 'user');
-    input.value = '';
-    
+    input.value = ''; // Vider le champ de saisie
+
     try {
         const response = await fetch('/ask', {
             method: 'POST',
@@ -101,7 +110,7 @@ async function processQuestion() {
             const { done, value } = await reader.read();
             if (done) break;
             buffer += decoder.decode(value, { stream: true });
-            
+
             const lines = buffer.split('\n');
             for (let i = 0; i < lines.length - 1; i++) {
                 const line = lines[i].trim();
@@ -121,7 +130,7 @@ async function processQuestion() {
                 }
 
                 if (!aiMsg) {
-                    // Création du message AI
+                    // Créer le message AI
                     aiMsg = {
                         content: data.chunk,
                         role: 'ai',
@@ -131,7 +140,7 @@ async function processQuestion() {
                     appendMessage(data.chunk, 'ai');
                     messageDiv = chatBox.lastChild;
                 } else {
-                    // Mise à jour progressive
+                    // Mettre à jour le contenu
                     aiMsg.content += data.chunk;
                     messageDiv.querySelector('div').textContent = aiMsg.content;
                     chatBox.scrollTop = chatBox.scrollHeight;
@@ -148,10 +157,31 @@ async function processQuestion() {
         }
 
         saveToLocalStorage();
-        
     } catch (error) {
         appendMessage(`Erreur: ${error.message}`, 'ai');
     }
 }
 
-// Les autres fonctions restent identiques...
+function clearHistory() {
+    if (confirm("Êtes-vous sûr de vouloir effacer l'historique ?")) {
+        localStorage.removeItem('chats');
+        location.reload();
+    }
+}
+
+function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+}
+
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('collapsed');
+}
+
+function saveToLocalStorage() {
+    localStorage.setItem('chats', JSON.stringify(chats));
+}
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', init);
