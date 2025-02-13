@@ -3,6 +3,7 @@
     --secondary-color: #3AAFA9;
     --background-color: #FEFFFF;
     --text-color: #17252A;
+    --sidebar-width: 280px;
 }
 
 * {
@@ -26,8 +27,9 @@ body.dark-mode {
 
 .container {
     display: grid;
-    grid-template-columns: 280px 1fr;
+    grid-template-columns: var(--sidebar-width) 1fr;
     height: 100vh;
+    transition: grid-template-columns 0.3s;
 }
 
 .sidebar {
@@ -37,6 +39,12 @@ body.dark-mode {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    position: relative;
+}
+
+.sidebar.collapsed {
+    width: 60px;
+    overflow: hidden;
 }
 
 .logo-container {
@@ -49,9 +57,14 @@ body.dark-mode {
     height: auto;
     margin-bottom: 1rem;
     border-radius: 50%;
+    transition: width 0.3s;
 }
 
-.new-chat, .clear-button, .dark-mode-button, .download-button {
+.sidebar.collapsed .logo {
+    width: 40px;
+}
+
+.new-chat, .clear-button {
     width: 100%;
     padding: 1rem;
     background: var(--secondary-color);
@@ -62,7 +75,7 @@ body.dark-mode {
     transition: transform 0.2s, background 0.3s;
 }
 
-.new-chat:hover, .clear-button:hover, .dark-mode-button:hover, .download-button:hover {
+.new-chat:hover, .clear-button:hover {
     background: #2B7A78;
     transform: translateY(-2px);
 }
@@ -83,6 +96,28 @@ body.dark-mode {
 
 .chat-item:hover {
     background: rgba(255, 255, 255, 0.2);
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.dark-mode-button, .minimize-button {
+    width: 100%;
+    padding: 0.8rem;
+    background: var(--secondary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.dark-mode-button:hover, .minimize-button:hover {
+    background: #2B7A78;
 }
 
 .main-content {
@@ -130,7 +165,7 @@ body.dark-mode .ai-message {
 .input-area {
     display: flex;
     gap: 1rem;
-    padding: 2rem;
+    padding: 1.5rem;
     background: white;
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
 }
@@ -149,8 +184,8 @@ input[type="text"] {
     color: var(--text-color);
 }
 
-button {
-    padding: 1rem 2rem;
+.send-button {
+    padding: 1rem 1.5rem;
     background: var(--primary-color);
     color: white;
     border: none;
@@ -159,7 +194,7 @@ button {
     transition: background 0.3s;
 }
 
-button:hover {
+.send-button:hover {
     background: var(--secondary-color);
 }
 

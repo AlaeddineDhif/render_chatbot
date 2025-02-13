@@ -28,6 +28,7 @@ function createNewChat() {
     saveToLocalStorage();
     renderChatList();
     clearChatBox();
+    window.location.href = '/'; // Recharger la page pour la nouvelle discussion
 }
 
 function renderChatList() {
@@ -49,11 +50,11 @@ function loadChat(chat) {
     chatBox.innerHTML = '';
     
     chat.messages.forEach(msg => {
-        appendMessage(msg.content, msg.role, msg.timestamp);
+        appendMessage(msg.content, msg.role);
     });
 }
 
-function appendMessage(content, role, timestamp) {
+function appendMessage(content, role) {
     const chatBox = document.getElementById('chatBox');
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${role}-message`;
@@ -61,12 +62,7 @@ function appendMessage(content, role, timestamp) {
     const contentDiv = document.createElement('div');
     contentDiv.textContent = content;
     
-    const timeSpan = document.createElement('span');
-    timeSpan.className = 'message-time';
-    timeSpan.textContent = new Date(timestamp).toLocaleTimeString();
-    
     messageDiv.appendChild(contentDiv);
-    messageDiv.appendChild(timeSpan);
     chatBox.appendChild(messageDiv);
     chatBox.scrollTop = chatBox.scrollHeight;
 }
@@ -83,7 +79,7 @@ async function processQuestion() {
         timestamp: new Date().toISOString()
     };
     currentChat.messages.push(userMsg);
-    appendMessage(question, 'user', userMsg.timestamp);
+    appendMessage(question, 'user');
     
     input.value = '';
     
@@ -105,12 +101,12 @@ async function processQuestion() {
                 timestamp: data.timestamp
             };
             currentChat.messages.push(aiMsg);
-            appendMessage(data.answer, 'ai', data.timestamp);
+            appendMessage(data.answer, 'ai');
         } else {
             throw new Error(data.error);
         }
     } catch (error) {
-        appendMessage(`Erreur: ${error.message}`, 'ai', new Date().toISOString());
+        appendMessage(`Erreur: ${error.message}`, 'ai');
     }
     
     saveToLocalStorage();
@@ -128,14 +124,9 @@ function toggleDarkMode() {
     localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
 }
 
-function downloadHistory() {
-    const blob = new Blob([JSON.stringify(chats, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'historique-chats.json';
-    a.click();
-    URL.revokeObjectURL(url);
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('collapsed');
 }
 
 function saveToLocalStorage() {

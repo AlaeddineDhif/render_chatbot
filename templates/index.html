@@ -9,7 +9,7 @@
 </head>
 <body>
     <div class="container">
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <div class="logo-container">
                 <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Tuteur IA" class="logo">
                 <h1>Tuteur IA</h1>
@@ -17,17 +17,20 @@
 
             <button class="new-chat" onclick="createNewChat()">➕ Nouvelle discussion</button>
             <button class="clear-button" onclick="clearHistory()">🗑️ Effacer l'historique</button>
-            <button class="dark-mode-button" onclick="toggleDarkMode()">🌙 Mode sombre</button>
-            <button class="download-button" onclick="downloadHistory()">📥 Télécharger l'historique</button>
 
             <div class="chat-history" id="chatHistory"></div>
+
+            <div class="sidebar-footer">
+                <button class="dark-mode-button" onclick="toggleDarkMode()">🌙 Mode sombre</button>
+                <button class="minimize-button" onclick="toggleSidebar()">◄ Minimiser</button>
+            </div>
         </aside>
 
         <main class="main-content">
             <div class="chat-box" id="chatBox"></div>
             <div class="input-area">
                 <input type="text" id="userInput" placeholder="Posez votre question ici...">
-                <button onclick="processQuestion()">Envoyer</button>
+                <button class="send-button" onclick="processQuestion()">➤</button>
             </div>
         </main>
     </div>
