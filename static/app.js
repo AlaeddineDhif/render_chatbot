@@ -10,18 +10,10 @@ function init() {
     }
     renderChatList();
 
+    // Activer le mode sombre si déjà configuré
     if (localStorage.getItem('darkMode') === 'true') {
         document.body.classList.add('dark-mode');
     }
-
-    // Gestion de la touche Entrée
-    const userInput = document.getElementById('userInput');
-    userInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault(); // Empêcher le comportement par défaut (comme un saut de ligne)
-            processQuestion(); // Appeler la fonction pour traiter la question
-        }
-    });
 }
 
 function createNewChat() {
@@ -36,7 +28,7 @@ function createNewChat() {
     saveToLocalStorage();
     renderChatList();
     clearChatBox();
-    window.location.href = '/';
+    window.location.href = '/'; // Recharger la page pour la nouvelle discussion
 }
 
 function renderChatList() {
@@ -80,7 +72,7 @@ async function processQuestion() {
     const question = input.value.trim();
     if (!question) return;
 
-    // Ajouter le message de l'utilisateur
+    // Ajouter message utilisateur
     const userMsg = {
         content: question,
         role: 'user',
@@ -88,8 +80,9 @@ async function processQuestion() {
     };
     currentChat.messages.push(userMsg);
     appendMessage(question, 'user');
-    input.value = ''; // Vider le champ de saisie
-
+    
+    input.value = '';
+    
     try {
         const response = await fetch('/ask', {
             method: 'POST',
@@ -98,68 +91,25 @@ async function processQuestion() {
             },
             body: JSON.stringify({ question })
         });
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
-        let aiMsg = null;
-        let messageDiv = null;
-        const chatBox = document.getElementById('chatBox');
-
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            buffer += decoder.decode(value, { stream: true });
-
-            const lines = buffer.split('\n');
-            for (let i = 0; i < lines.length - 1; i++) {
-                const line = lines[i].trim();
-                if (!line) continue;
-
-                let data;
-                try {
-                    data = JSON.parse(line);
-                } catch (e) {
-                    console.error('JSON invalide:', line);
-                    continue;
-                }
-
-                if (data.error) {
-                    appendMessage(`Erreur: ${data.error}`, 'ai');
-                    throw new Error(data.error);
-                }
-
-                if (!aiMsg) {
-                    // Créer le message AI
-                    aiMsg = {
-                        content: data.chunk,
-                        role: 'ai',
-                        timestamp: data.timestamp
-                    };
-                    currentChat.messages.push(aiMsg);
-                    appendMessage(data.chunk, 'ai');
-                    messageDiv = chatBox.lastChild;
-                } else {
-                    // Mettre à jour le contenu
-                    aiMsg.content += data.chunk;
-                    messageDiv.querySelector('div').textContent = aiMsg.content;
-                    chatBox.scrollTop = chatBox.scrollHeight;
-                }
-            }
-            buffer = lines[lines.length - 1];
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            const aiMsg = {
+                content: data.answer,
+                role: 'ai',
+                timestamp: data.timestamp
+            };
+            currentChat.messages.push(aiMsg);
+            appendMessage(data.answer, 'ai');
+        } else {
+            throw new Error(data.error);
         }
-
-        if (buffer.trim()) {
-            const data = JSON.parse(buffer);
-            aiMsg.content += data.chunk;
-            messageDiv.querySelector('div').textContent = aiMsg.content;
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        saveToLocalStorage();
     } catch (error) {
         appendMessage(`Erreur: ${error.message}`, 'ai');
     }
+    
+    saveToLocalStorage();
 }
 
 function clearHistory() {
@@ -185,3 +135,6 @@ function saveToLocalStorage() {
 
 // Initialisation
 document.addEventListener('DOMContentLoaded', init);
+document.getElementById('userInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') processQuestion();
+});
