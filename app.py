@@ -7,15 +7,8 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-# Configurez l'API avec la version correcte
-genai.configure(api_key=os.environ.get("AIzaSyDpBdtPhSifJaea1vSEOXyL-X23SEtmOoo"), api_version="v1")
-
-# Liste des modèles disponibles (pour vérification)
-models = genai.list_models()
-for model in models:
-    print(f"Model Name: {model.name}")
-    print(f"Supported Methods: {model.supported_generation_methods}")
-    print("------")
+# Configurez l'API avec la clé API stockée dans la variable d'environnement
+genai.configure(api_key=os.environ.get("API_KEY"))
 
 @app.route('/')
 def home():
