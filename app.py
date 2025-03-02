@@ -7,7 +7,15 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-genai.configure(api_key=os.environ.get("AIzaSyDpBdtPhSifJaea1vSEOXyL-X23SEtmOoo"))
+# Configurez l'API avec la version correcte
+genai.configure(api_key=os.environ.get("AIzaSyDpBdtPhSifJaea1vSEOXyL-X23SEtmOoo"), api_version="v1")
+
+# Liste des modèles disponibles (pour vérification)
+models = genai.list_models()
+for model in models:
+    print(f"Model Name: {model.name}")
+    print(f"Supported Methods: {model.supported_generation_methods}")
+    print("------")
 
 @app.route('/')
 def home():
@@ -19,7 +27,8 @@ def ask_question():
         data = request.json
         prompt = data['question']
         
-        model = genai.GenerativeModel('gemini-pro')
+        # Utilisez un modèle disponible
+        model = genai.GenerativeModel('gemini-pro')  # Remplacez par un modèle disponible si nécessaire
         response = model.generate_content(prompt)
         
         return jsonify({
