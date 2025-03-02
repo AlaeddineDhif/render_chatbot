@@ -10,6 +10,17 @@ CORS(app)
 # Configurez l'API avec la clé API stockée dans la variable d'environnement
 genai.configure(api_key=os.environ.get("API_KEY"))
 
+
+# Liste des modèles disponibles
+models = genai.list_models()
+for model in models:
+    print(f"Model Name: {model.name}")
+    print(f"Supported Methods: {model.supported_generation_methods}")
+    print("------")
+
+
+
+
 @app.route('/')
 def home():
     return render_template('index.html')
