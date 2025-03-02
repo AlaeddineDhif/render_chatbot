@@ -10,16 +10,7 @@ CORS(app)
 # Configurez l'API avec la clé API stockée dans la variable d'environnement
 genai.configure(api_key=os.environ.get("API_KEY"))
 
-
-# Liste des modèles disponibles
-models = genai.list_models()
-for model in models:
-    print(f"Model Name: {model.name}")
-    print(f"Supported Methods: {model.supported_generation_methods}")
-    print("------")
-
-
-
+print(f"API_KEY: {os.environ.get('API_KEY')}")
 
 @app.route('/')
 def home():
@@ -32,7 +23,7 @@ def ask_question():
         prompt = data['question']
         
         # Utilisez un modèle disponible
-        model = genai.GenerativeModel('gemini-pro')  # Remplacez par un modèle disponible si nécessaire
+        model = genai.GenerativeModel('gemini-1.5-pro')  # Modèle disponible
         response = model.generate_content(prompt)
         
         return jsonify({
