@@ -9,11 +9,6 @@ function init() {
         loadChat(currentChat);
     }
     renderChatList();
-
-    // Activer le mode sombre si déjà configuré
-    if (localStorage.getItem('darkMode') === 'true') {
-        document.body.classList.add('dark-mode');
-    }
 }
 
 function createNewChat() {
@@ -28,7 +23,6 @@ function createNewChat() {
     saveToLocalStorage();
     renderChatList();
     clearChatBox();
-    window.location.href = '/'; // Recharger la page pour la nouvelle discussion
 }
 
 function renderChatList() {
@@ -101,7 +95,7 @@ async function processQuestion() {
                 timestamp: data.timestamp
             };
             currentChat.messages.push(aiMsg);
-            appendMessage(data.answer, 'ai');
+            simulateTypingEffect(data.answer, 'ai');
         } else {
             throw new Error(data.error);
         }
@@ -112,21 +106,34 @@ async function processQuestion() {
     saveToLocalStorage();
 }
 
+function simulateTypingEffect(text, role) {
+    const chatBox = document.getElementById('chatBox');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${role}-message`;
+    const contentDiv = document.createElement('div');
+    messageDiv.appendChild(contentDiv);
+    chatBox.appendChild(messageDiv);
+
+    let index = 0;
+    const speed = 20;
+
+    function typeWriter() {
+        if (index < text.length) {
+            contentDiv.textContent += text.charAt(index);
+            index++;
+            chatBox.scrollTop = chatBox.scrollHeight;
+            setTimeout(typeWriter, speed);
+        }
+    }
+    
+    typeWriter();
+}
+
 function clearHistory() {
     if (confirm("Êtes-vous sûr de vouloir effacer l'historique ?")) {
         localStorage.removeItem('chats');
         location.reload();
     }
-}
-
-function toggleDarkMode() {
-    document.body.classList.toggle('dark-mode');
-    localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
-}
-
-function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    sidebar.classList.toggle('collapsed');
 }
 
 function saveToLocalStorage() {
