@@ -54,11 +54,20 @@ function appendMessage(content, role) {
     messageDiv.className = `message ${role}-message`;
     
     const contentDiv = document.createElement('div');
-    contentDiv.textContent = content;
-    
+    contentDiv.textContent = formatResponse(content); // Formater la réponse
     messageDiv.appendChild(contentDiv);
     chatBox.appendChild(messageDiv);
     chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function formatResponse(text) {
+    // Supprimer les caractères superflus comme ":** * **"
+    text = text.replace(/:\*\* \* \*\*/g, '');
+    // Remplacer les astérisques par des tirets pour une meilleure lisibilité
+    text = text.replace(/\*/g, '-');
+    // Ajouter des sauts de ligne pour une meilleure structure
+    text = text.replace(/\n/g, '<br>');
+    return text;
 }
 
 async function processQuestion() {
@@ -119,7 +128,7 @@ function simulateTypingEffect(text, role) {
 
     function typeWriter() {
         if (index < text.length) {
-            contentDiv.textContent += text.charAt(index);
+            contentDiv.innerHTML += formatResponse(text.charAt(index)); // Formater chaque caractère
             index++;
             chatBox.scrollTop = chatBox.scrollHeight;
             setTimeout(typeWriter, speed);

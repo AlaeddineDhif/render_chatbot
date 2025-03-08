@@ -26,9 +26,12 @@ def ask_question():
         model = genai.GenerativeModel('gemini-1.5-pro')  # Modèle disponible
         response = model.generate_content(prompt)
         
+        # Formater la réponse pour supprimer les caractères superflus
+        formatted_response = response.text.replace(':** * **', '').replace('*', '-')
+        
         return jsonify({
             'success': True,
-            'answer': response.text,
+            'answer': formatted_response,
             'timestamp': datetime.now().strftime("%d/%m/%Y %H:%M")
         })
     except Exception as e:
